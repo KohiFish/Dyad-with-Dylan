@@ -1,23 +1,17 @@
-const axios = require('axios');
-const cheerio = require('cheerio');
-const fs = require('fs');
+import puppeteer from 'puppeteer-extra';
+import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 
-const url = 'https://home-access.cfisd.net/HomeAccess/Account/LogOn?ReturnUrl=%2fHomeAccess%2f';
+const browser = await puppeteer.launch({headless: true});
+const page = await browser.newPage();
+await page.setViewport({ width: 1280, height: 800 });
 
-const homeAccess = {};
+const districtUrl = document.getElementById('district-url').value;
+await page.goto(districtUrl, {waitUntil: 'networkidle2'});
 
-async function homeAccess() {
-  
-  // 1. Fetch the raw HTML from the website
-  const { data } = await axios.get(url);
-  
-  // 2. Load the HTML into cheerio
-  const $ = cheerio.load(data);
-  
-  // 3. Target the root and output the entire HTML structure
-  const wholeHTML = $.html();
-  
-  console.log(wholeHTML);
-}
+const username = document.getByElementId('username').value;
+const password = document.getByElementId('password').value;
 
-homeAccess();
+await page.waitForSelector('#LogOnModel_UserName');
+
+
+
