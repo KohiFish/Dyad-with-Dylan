@@ -1,6 +1,15 @@
-const { app, BrowserWindow, globalShortcut } = require('electron');
+const {
+    app,
+    BrowserWindow,
+    globalShortcut,
+    Menu,
+    Tray,
+    nativeImage
+} = require('electron');
+const path = require('path');
 
 let mainWindow;
+let tray;
 let isQuitting = false;
 
 function createWindow() {
@@ -29,8 +38,39 @@ function createWindow() {
     });
 }
 
+function createTray() {
+    const icon = nativeImage.createFromPath(
+        path.join(__dirname, '3.0 Icon.png')
+    );
+    tray = new Tray(icon);
+    tray.setToolTip('Grade Menu');
+    tray.setContextMenu(Menu.buildFromTemplate([
+        {
+            label: 'Show App',
+            click: () => {
+                if (mainWindow && !mainWindow.isDestroyed()) {
+                    mainWindow.show();
+                    mainWindow.focus();
+                }
+            }
+        },
+        {
+            label: 'Quit',
+            click: () => {
+                isQuitting = true;
+                app.quit();
+            }
+        }
+    ]));
+}
+
 app.whenReady().then(() => { 
     createWindow();
+    createTray();
+
+    if (process.platform === 'darwin') {
+        app.dock.hide();
+    }
 
     const hotkey = 'CommandOrControl+Alt+1';
     const ret = globalShortcut.register(hotkey, () => {
