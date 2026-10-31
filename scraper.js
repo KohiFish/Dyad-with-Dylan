@@ -28,7 +28,4 @@ const gradesData = await page.evaluate(() => {
     return parsedClasses;
 });
 
-finally {
-  await browser.close();
-}
-
+await broswer.close();
