@@ -23,6 +23,10 @@ app.whenReady().then(() => {
 
     const hotkey = process.platform ==='darwin'?'Command+Option+1':'Ctrl+Alt+1';
     const ret = globalShortcut.register(hotkey, () => {
+        if (!mainWindow || mainWindow.isDestroyed()) {
+            createWindow();
+        }
+
         if (mainWindow.isVisible()) {
             mainWindow.hide();
         } else {
@@ -38,4 +42,8 @@ app.whenReady().then(() => {
 
 app.on('will-quit', () => {
     globalShortcut.unregisterAll();
-})
+});
+
+app.on('window-all-closed', (event) => {
+    event.preventDefault();
+});
