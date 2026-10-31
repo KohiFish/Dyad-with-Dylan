@@ -1,25 +1,23 @@
 {
-  "name": "dyad",
+  "name": "gpa-program",
   "version": "1.0.0",
-  "description": "",
-  "main": "app.js",
+  "description": "I wanted to make a program similar to GradeWay to do what-ifs with my grades since GradeWay is subscription-based.",
+  "main": "main.js",
   "scripts": {
+    "start": "electron .",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
-  "dependencies": {
-    "axios": "^1.21.0",
-    "bcryptjs": "^3.0.3",
-    "cheerio": "^1.2.0",
-    "cors": "^2.8.6",
-    "dotenv": "^18.0.9",
-    "express": "^5.3.0",
-    "jsonwebtoken": "^9.0.3"
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KohiFish/GPA-Program.git"
   },
+  "keywords": [],
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/KohiFish/GPA-Program/issues"
+  },
+  "homepage": "https://github.com/KohiFish/GPA-Program#readme",
   "devDependencies": {
-    "electron": "^45.2.1"
+    "electron": "^45.2.0"
   }
 }
