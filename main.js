@@ -1,21 +1,44 @@
-const cheerio = require('cheerio');
-const { session } = require('electron');
+const { app, BrowserWindow, globalShortcut } = require('electron');
 
-async function fetchGrades(baseUrl, user, pass) {
-  const ses = session.fromPartition('hac');
+let mainWindow;
 
-  const loginPage = await ses.fetch(`${baseUrl}/HomeAccess/Account/LogOn`);
-  const $ = cheerio.load(await loginPage.text());
-  const token = $('input[name="__RequestVerificationToken"]').val();
+function createWindow() {
+    mainWindow = new BrowserWindow({
+        width: 400,
+        height: 550,
+        show: false,
+        frame: false,
+        alwaysOnTop: true,
+        webPreferences: {
+            nodeIntegration:true,
+            contextIsolation: false
+        }
+    });
 
-
-  const body = new URLSearchParams({
-    __RequestVerificationToken: token,
-    'LogOnDetails.UserName': user,
-    'LogOnDetails.Password': pass,
-  });
-  await ses.fetch(`${baseUrl}/HomeAccess/Account/LogOn`, { method: 'POST', body });
-
-  const page = await ses.fetch(`${baseUrl}/HomeAccess/Content/Student/Assignments.aspx`);
-  const $$ = cheerio.load(await page.text());
+    mainWindow.loadFile('index.html');
+    mainWindow.on('blur', () => {
+        mainWindow.hide();
+    });
 }
+
+app.whenReady().then(() => { 
+    createWindow();
+
+    const hotkey = process.platform ==='darwin'?'Command+Alt+1':'Ctrl+Alt+1';
+    const ret = globalShortcut.register(hotkey, () => {
+        if (mainWindow.isVisible()) {
+            mainWindow.hide();
+        } else {
+            mainWindow.show();
+            mainWindow.focus();
+        }
+    });
+    if (!ret) {
+        console.log('Registration failed for global shortcut');
+        console.log('Please return to the main menu');
+    }
+});
+
+app.on('will-quit', () => {
+    globalShortcut.unregisterAll();
+})
