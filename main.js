@@ -16,15 +16,12 @@ function createWindow() {
     });
 
     mainWindow.loadFile('index.html');
-    mainWindow.on('blur', () => {
-        mainWindow.hide();
-    });
 }
 
 app.whenReady().then(() => { 
     createWindow();
 
-    const hotkey = process.platform ==='darwin'?'Command+Alt+1':'Ctrl+Alt+1';
+    const hotkey = process.platform ==='darwin'?'Command+Option+1':'Ctrl+Alt+1';
     const ret = globalShortcut.register(hotkey, () => {
         if (mainWindow.isVisible()) {
             mainWindow.hide();
