@@ -4,9 +4,14 @@ const {
     globalShortcut,
     Menu,
     Tray,
-    nativeImage
+    nativeImage,
+    ipcMain
 } = require('electron');
 const path = require('path');
+const puppeteer = require('puppeteer-extra');
+const StealthPlugin = require('puppeteer-extra-plugin-stealth');
+puppeteer.use(StealthPlugin());
+const { isCryptoKey } = require('util/types');
 
 let mainWindow;
 let tray;
@@ -37,7 +42,34 @@ function createWindow() {
         mainWindow = null;
     });
 }
-
+ipcMain.handle('scrape-grades', async (event, { districtUrl, username, password }) => {
+    try {
+        const browser = await puppeteer.launch({ headless: false });
+        const page = await browser.newPage();
+        await page.setViewport({ width: 1280, height: 800 });
+        await page.goto(districtUrl, { waitUntil: 'networkidle2' });
+        await page.waitForSelector('#LogOnModel_Username');
+        await page.type('#LogOnModel_Username', username);
+        await page.type('#LogOnModel_Password', password);
+        await Promise.all([
+            page.click('button[type="submit"]'),
+            page.waitForNavigation({ waitUntil: 'networkidle2' })
+        ]);
+        const gradesData = await page.evaluate(() => {
+            const parsedClasses = [];
+            const classes = document.querySelectorAll('.sg-main-content .sg-header-heading');
+            classes.forEach((el) => {
+                parsedClasses.push({ className: el.innerText.trim() });
+            });
+            return parsedClasses;
+        });
+        await browser.close();
+        return { success: true, data: gradesData };
+    } catch (error) {
+        console.error(error);
+        return { success: false, error: error.message }; 
+    }
+});
 function createTray() {
     const icon = nativeImage.createFromPath(
         path.join(__dirname, '3.0 Icon.png')

@@ -121,15 +121,45 @@
                 <button type="submit">Connect and view grades</button>
             </form>
         </div>
+        
 
         <script>
-            document.getElementById('hac-login-form').addEventListener('submit', (e) => {
-                e.preventDefault();
+            const { ipcRenderer } = require('electron');
+            const loginScreen = document.getElementById('login-screen');
+            const gradesScreen = document.getElementById('grades-screen');
+            const gradesList = document.getElementById('grades-list');
+            const loginForm = document.getElementById('hac-login-form');
+            const submitBtn = loginForm.querySelector('button[type="submit"]');
+            loginForm.addEventListener('submit', async (e) => {
                 const districtUrl = document.getElementById('district-url').value;
                 const username = document.getElementById('username').value;
-                
-                console.log('Logging in with:', { districtUrl, username });
-                alert('Credentials saved! Next step: connecting to HAC.');
+                const password = document.getElementById('password').value;
+                submitBtn.textContent = "Connecting..."
+                submitBtn.disabled = true;
+                const result = await ipcRenderer.invoke('scrape-grades', { districtUrl, username, password });
+                submitBtn.textContent = 'Connect'
+                submitBtn.disabled = false;
+                if (result.success) {
+                    loginScreen.style.display = 'none';
+                    gradesScreen.style.display = 'flex';
+                    gradesList.innerHTML = '';
+                    if (result.data.length === 0) {
+                        gradesList.innerHTML - '<p style="color: #aaaaaa;">No classes found. Please check your page selectors.</p>';
+                    } else {
+                        result.data.forEach(cls => {
+                            const card = document.createElement('div');
+                            card.className = 'grade-card';
+                            card.textContent = cls.className;
+                            gradesList.appendChild(card);
+                        });
+                    }
+                } else {
+                    alert('Failed to login: ' + result.error);
+                }
+            });
+            document.getElementById('back-btn').addEventListener('click', () => {
+                gradesScreen.style.display = 'none';
+                loginScreen.style.display = 'flex';
             });
         </script>
     </body>
